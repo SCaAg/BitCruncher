@@ -1,4 +1,4 @@
-
+```
 BitCruncher/
 ├── rtl/             # Verilog RTL (Register-Transfer Level) 源代码
 │   ├── registers/    # 寄存器模块
@@ -32,7 +32,7 @@ BitCruncher/
 │   ├── CPU_DesignSpec.md # CPU 设计规范文档 (你提供的文档)
 │   ├── README.md       # 项目 README 文件
 └── proj/            # FPGA 工程文件 (例如 Vivado 工程) (可选)
-
+```
 
 文件职责详细划分：
 
