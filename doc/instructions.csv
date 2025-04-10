@@ -1,0 +1,23 @@
+INSTRUCTION,OPCODE,COMMENTS
+
+# Data I/O
+
+STORE X,00000001,"ACC → [X]"
+LOAD X,00000010,"[X] → ACC"
+
+# Data Calculate
+
+ADD X,00000011,"ACC + [X] → ACC"
+SUB X,00000100,"ACC - [X] → ACC"
+MPY X,00001000,"ACC ×[X] → MR, ACC"
+AND X,00001010,"ACC and [X] → ACC"
+OR X,00001011,"ACC or [X] → ACC"
+NOT X,00001100,"NOT [X] → ACC"
+SHIFTR,00001101,"SHIFT [X] to Right 1bit, Logic Shift"
+SHIFTL,00001110,"SHIFT [X] to Left 1bit, Logic Shift"
+
+# Stream Control
+
+JMPGEZ X,00000101,"IF ACC ≥ 0 then X → PC else PC+1 → PC"
+JMP X,00000110,"X → PC"
+HALT,00000111,"Halt a program"
