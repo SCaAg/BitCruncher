@@ -25,34 +25,36 @@ module CU_tb;
     end
     
     // Convenience functions to extract control signals
-    function automatic string decode_control_signals;
+    // Displays the active control signals
+    task display_control_signals;
         input [31:0] signals;
         begin
-            decode_control_signals = "";
-            if (signals[0]) decode_control_signals = {decode_control_signals, " C0(CAR+1)"};
-            if (signals[1]) decode_control_signals = {decode_control_signals, " C1(Redirect)"};
-            if (signals[2]) decode_control_signals = {decode_control_signals, " C2(CAR=0)"};
-            if (signals[3]) decode_control_signals = {decode_control_signals, " C3(MBR<=Mem)"};
-            if (signals[4]) decode_control_signals = {decode_control_signals, " C4(IR<=MBR)"};
-            if (signals[5]) decode_control_signals = {decode_control_signals, " C5(MAR<=MBR)"};
-            if (signals[6]) decode_control_signals = {decode_control_signals, " C6(PC+1)"};
-            if (signals[7]) decode_control_signals = {decode_control_signals, " C7(BR<=MBR)"};
-            if (signals[8]) decode_control_signals = {decode_control_signals, " C8(ACC=0)"};
-            if (signals[9]) decode_control_signals = {decode_control_signals, " C9(ACC+=BR)"};
-            if (signals[10]) decode_control_signals = {decode_control_signals, " C10(MAR<=PC)"};
-            if (signals[11]) decode_control_signals = {decode_control_signals, " C11(Mem<=MBR)"};
-            if (signals[12]) decode_control_signals = {decode_control_signals, " C12(MBR<=ACC)"};
-            if (signals[13]) decode_control_signals = {decode_control_signals, " C13(ACC-=BR)"};
-            if (signals[14]) decode_control_signals = {decode_control_signals, " C14(PC<=MBR)"};
-            if (signals[15]) decode_control_signals = {decode_control_signals, " C15(ACC*=BR)"};
-            if (signals[16]) decode_control_signals = {decode_control_signals, " C16(ACC/=BR)"};
-            if (signals[17]) decode_control_signals = {decode_control_signals, " C17(ACC<<=BR)"};
-            if (signals[18]) decode_control_signals = {decode_control_signals, " C18(ACC>>=BR)"};
-            if (signals[19]) decode_control_signals = {decode_control_signals, " C19(ACC&=BR)"};
-            if (signals[20]) decode_control_signals = {decode_control_signals, " C20(ACC|=BR)"};
-            if (signals[21]) decode_control_signals = {decode_control_signals, " C21(ACC=~BR)"};
+            $write("Active signals:");
+            if (signals[0]) $write(" C0(CAR+1)");
+            if (signals[1]) $write(" C1(Redirect)");
+            if (signals[2]) $write(" C2(CAR=0)");
+            if (signals[3]) $write(" C3(MBR<=Mem)");
+            if (signals[4]) $write(" C4(IR<=MBR)");
+            if (signals[5]) $write(" C5(MAR<=MBR)");
+            if (signals[6]) $write(" C6(PC+1)");
+            if (signals[7]) $write(" C7(BR<=MBR)");
+            if (signals[8]) $write(" C8(ACC=0)");
+            if (signals[9]) $write(" C9(ACC+=BR)");
+            if (signals[10]) $write(" C10(MAR<=PC)");
+            if (signals[11]) $write(" C11(Mem<=MBR)");
+            if (signals[12]) $write(" C12(MBR<=ACC)");
+            if (signals[13]) $write(" C13(ACC-=BR)");
+            if (signals[14]) $write(" C14(PC<=MBR)");
+            if (signals[15]) $write(" C15(ACC*=BR)");
+            if (signals[16]) $write(" C16(ACC/=BR)");
+            if (signals[17]) $write(" C17(ACC<<=BR)");
+            if (signals[18]) $write(" C18(ACC>>=BR)");
+            if (signals[19]) $write(" C19(ACC&=BR)");
+            if (signals[20]) $write(" C20(ACC|=BR)");
+            if (signals[21]) $write(" C21(ACC=~BR)");
+            $write("\n");
         end
-    endfunction
+    endtask
     
     // Test sequence
     initial begin
@@ -73,7 +75,8 @@ module CU_tb;
         // Wait for 10 clock cycles to observe all microinstructions for LOAD
         repeat(10) begin
             #10;
-            $display("Time %t: Control_Signals = %b - %s", $time, Control_Signals, decode_control_signals(Control_Signals));
+            $display("Time %t: Control_Signals = %b", $time, Control_Signals);
+            display_control_signals(Control_Signals);
         end
         
         // Reset CU to start fresh
@@ -89,7 +92,8 @@ module CU_tb;
         // Wait for 10 clock cycles
         repeat(10) begin
             #10;
-            $display("Time %t: Control_Signals = %b - %s", $time, Control_Signals, decode_control_signals(Control_Signals));
+            $display("Time %t: Control_Signals = %b", $time, Control_Signals);
+            display_control_signals(Control_Signals);
         end
         
         // Reset CU to start fresh
@@ -106,7 +110,8 @@ module CU_tb;
         // Wait for 10 clock cycles
         repeat(10) begin
             #10;
-            $display("Time %t: Control_Signals = %b - %s", $time, Control_Signals, decode_control_signals(Control_Signals));
+            $display("Time %t: Control_Signals = %b", $time, Control_Signals);
+            display_control_signals(Control_Signals);
         end
         
         // Reset CU to start fresh
@@ -123,7 +128,8 @@ module CU_tb;
         // Wait for 10 clock cycles
         repeat(10) begin
             #10;
-            $display("Time %t: Control_Signals = %b - %s", $time, Control_Signals, decode_control_signals(Control_Signals));
+            $display("Time %t: Control_Signals = %b", $time, Control_Signals);
+            display_control_signals(Control_Signals);
         end
         
         // Reset CU to start fresh
@@ -139,7 +145,8 @@ module CU_tb;
         // Wait for 10 clock cycles
         repeat(10) begin
             #10;
-            $display("Time %t: Control_Signals = %b - %s", $time, Control_Signals, decode_control_signals(Control_Signals));
+            $display("Time %t: Control_Signals = %b", $time, Control_Signals);
+            display_control_signals(Control_Signals);
         end
         
         // Reset CU to start fresh
@@ -155,7 +162,8 @@ module CU_tb;
         // Wait for 10 clock cycles
         repeat(10) begin
             #10;
-            $display("Time %t: Control_Signals = %b - %s", $time, Control_Signals, decode_control_signals(Control_Signals));
+            $display("Time %t: Control_Signals = %b", $time, Control_Signals);
+            display_control_signals(Control_Signals);
         end
         
         // Reset CU to start fresh
@@ -171,7 +179,8 @@ module CU_tb;
         // Wait for 10 clock cycles
         repeat(10) begin
             #10;
-            $display("Time %t: Control_Signals = %b - %s", $time, Control_Signals, decode_control_signals(Control_Signals));
+            $display("Time %t: Control_Signals = %b", $time, Control_Signals);
+            display_control_signals(Control_Signals);
         end
         
         // Reset CU to start fresh
@@ -187,7 +196,8 @@ module CU_tb;
         // Wait for 10 clock cycles
         repeat(10) begin
             #10;
-            $display("Time %t: Control_Signals = %b - %s", $time, Control_Signals, decode_control_signals(Control_Signals));
+            $display("Time %t: Control_Signals = %b", $time, Control_Signals);
+            display_control_signals(Control_Signals);
         end
         
         // Reset CU to start fresh
@@ -203,7 +213,8 @@ module CU_tb;
         // Wait for 10 clock cycles
         repeat(10) begin
             #10;
-            $display("Time %t: Control_Signals = %b - %s", $time, Control_Signals, decode_control_signals(Control_Signals));
+            $display("Time %t: Control_Signals = %b", $time, Control_Signals);
+            display_control_signals(Control_Signals);
         end
         
         // Finish simulation
