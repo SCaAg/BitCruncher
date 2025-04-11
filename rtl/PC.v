@@ -38,7 +38,7 @@ module PC(
         end
         else begin
             if(C14) begin
-                PCr <= MBR_out[15:8]; //取操作码
+                PCr <= MBR_out[7:0]; // Use address part, not opcode
             end
             else if(C6) begin
                 PCr <= PCr + 1'b1; //自增
