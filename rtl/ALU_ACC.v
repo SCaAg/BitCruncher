@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+//timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -35,28 +35,89 @@ module ALU_ACC(
     input C21,
     input [15:0] BR_out,
     output [15:0] ALU_out,
-    output reg [3:0] ALUflags
+    output reg [3:0] ALUflags // {ZF, CF, OF, SF} - Zero Flag, Carry Flag, Overflow Flag, Sign Flag
     );
 
     reg [15:0] ACC;
     assign ALU_out = ACC;
-
+    
+    // Temporary registers for flag calculations
+    reg ZF, CF, OF, SF;
+    reg [16:0] temp_result; // 17-bit for carry detection
+    
     always@(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
             ACC <= 16'b0;
+            ALUflags <= 4'b0;
         end
         else begin
-            if(C8) ACC <= 16'b0;
-            else if(C9) ACC <= ACC + BR_out;
-            else if(C13) ACC <= ACC - BR_out;
-            else if(C15) ACC <= ACC * BR_out;
-            else if(C16) ACC <= ACC / BR_out;
-            else if(C17) ACC <= ACC >> 1;
-            else if(C18) ACC <= ACC << 1;
-            else if(C19) ACC <= ACC & BR_out;
-            else if(C20) ACC <= ACC | BR_out;
-            else if(C21) ACC <= ~ACC;
-            else ACC <= ACC;
+            // Default flag values
+            ZF = (ACC == 16'b0);
+            SF = ACC[15];  // Sign bit
+            CF = 1'b0;     // Default carry
+            OF = 1'b0;     // Default overflow
+            
+            if(C8) begin
+                ACC <= 16'b0;
+                ZF = 1'b1;  // Reset ACC means ZF=1
+                SF = 1'b0;  // Reset ACC means SF=0
+            end
+            else if(C9) begin 
+                temp_result = {1'b0, ACC} + {1'b0, BR_out};
+                ACC <= temp_result[15:0];
+                CF = temp_result[16];  // Carry flag
+                OF = (ACC[15] == BR_out[15]) && (ACC[15] != temp_result[15]);  // Overflow detection
+                ZF = (temp_result[15:0] == 16'b0);
+                SF = temp_result[15];
+            end
+            else if(C13) begin
+                temp_result = {1'b0, ACC} - {1'b0, BR_out};
+                ACC <= temp_result[15:0];
+                CF = temp_result[16];  // Borrow (inverted carry)
+                OF = (ACC[15] != BR_out[15]) && (ACC[15] != temp_result[15]);  // Overflow detection
+                ZF = (temp_result[15:0] == 16'b0);
+                SF = temp_result[15];
+            end
+            else if(C15) begin
+                ACC <= ACC * BR_out;
+                ZF = (ACC * BR_out == 16'b0);
+                SF = (ACC * BR_out)[15];
+            end
+            else if(C16) begin
+                if(BR_out != 16'b0) begin  // Avoid division by zero
+                    ACC <= ACC / BR_out;
+                    ZF = (ACC / BR_out == 16'b0);
+                    SF = (ACC / BR_out)[15];
+                end
+            end
+            else if(C17) begin
+                ACC <= ACC << BR_out[3:0]; // Shift left logical by BR value
+                ZF = (ACC << BR_out[3:0] == 16'b0);
+                SF = (ACC << BR_out[3:0])[15];
+            end
+            else if(C18) begin
+                ACC <= ACC >> BR_out[3:0]; // Shift right logical by BR value
+                ZF = (ACC >> BR_out[3:0] == 16'b0);
+                SF = (ACC >> BR_out[3:0])[15];
+            end
+            else if(C19) begin
+                ACC <= ACC & BR_out;
+                ZF = ((ACC & BR_out) == 16'b0);
+                SF = (ACC & BR_out)[15];
+            end
+            else if(C20) begin
+                ACC <= ACC | BR_out;
+                ZF = ((ACC | BR_out) == 16'b0);
+                SF = (ACC | BR_out)[15];
+            end
+            else if(C21) begin
+                ACC <= ~BR_out;  // NOT operation on BR, not ACC
+                ZF = (~BR_out == 16'b0);
+                SF = (~BR_out)[15];
+            end
+            
+            // Update ALUflags
+            ALUflags <= {ZF, CF, OF, SF};
         end
     end
 endmodule
