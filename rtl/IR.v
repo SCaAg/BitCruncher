@@ -21,26 +21,24 @@
 
 
 module IR(
-    input clk,
-    input rst_n,
-    input C4,
-    input [15:0] MBR_out,
-    output [7:0] IR_out
+    input wire clk,
+    input wire rst_n,
+    input wire C4,
+    input wire [15:0] MBR_in,
+    output reg [7:0] IR_out
     );
 
-    reg [7:0] IRr;
-    assign IR_out = IRr;
 
     always@(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
-            IRr <= 8'b0;
+            IR_out <= 8'b0;
         end
         else begin
             if(C4) begin
-                IRr <= MBR_out[15:8];
+                IR_out <= MBR_in[15:8];
             end
             else begin
-                IRr <= IRr;
+                IR_out <= IR_out;
             end
         end
     end

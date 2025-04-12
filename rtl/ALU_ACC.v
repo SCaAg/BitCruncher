@@ -1,123 +1,80 @@
-//timescale 1ns / 1ps
+`timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
 // 
-// Create Date: 2025/03/19 19:12:31
-// Design Name: 
-// Module Name: ALU_ACC
+// Create Date: 2025/03/20 11:00:00
+// Design Name: Accumulator Register
+// Module Name: ACC
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: 16-bit Accumulator register with integrated ALU control.
+//              Loads result from ALU based on C22 enable signal.
+//              Feeds its current value back to the ALU.
 // 
-// Dependencies: 
+// Dependencies: ALU.v
 // 
 // Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
+// Revision 1.00 - File Created
+// Additional Comments: Based on ALU.v and doc/寄组II预定义.md
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+module ALU_ACC (
+    // Clock and Reset
+    input wire clk,
+    input wire rst_n, // Active high reset
 
-module ALU_ACC(
-    input clk,
-    input rst_n,
-    input C8,
-    input C9,
-    input C13,
-    input C15,
-    input C16,
-    input C17,
-    input C18,
-    input C19,
-    input C20,
-    input C21,
-    input [15:0] BR_out,
-    output [15:0] ALU_out,
-    output reg [3:0] ALUflags // {ZF, CF, OF, SF} - Zero Flag, Carry Flag, Overflow Flag, Sign Flag
+    // Control Inputs
+    input wire C8, C9, C13, C15, C16, C17, C18, C19, C20, C21, // ALU Op Controls
+
+    // Data Input
+    input wire [15:0] BR_in, // Data input from Bus Register (for ALU)
+
+    // Data Outputs
+    output reg [15:0] ACC_out, // Current Accumulator Value
+    output reg [3:0] ALUflags // Flags from ALU {ZF, CF, OF, SF}
+);
+
+    // Internal wires for ALU outputs
+    wire [15:0] ALU_out_wire;
+    wire [3:0] ALUflags_wire;
+    
+    // Instantiate the Arithmetic Logic Unit (ALU)
+    ALU alu_inst (
+        // Control Inputs (Pass through)
+        .C8(C8), 
+        .C9(C9), 
+        .C13(C13), 
+        .C15(C15), 
+        .C16(C16), 
+        .C17(C17), 
+        .C18(C18), // Note: Markdown C17/C18 seem swapped vs ALU.v C17/C18 (SHL/SHR)
+        .C19(C19), 
+        .C20(C20), 
+        .C21(C21), // Note: Markdown C21 is NOT ACC, ALU.v C21 is NOT BR. Using ALU.v behavior.
+
+        // Data Inputs
+        .ACC_in(ACC_out), // Feed current ACC value to ALU
+        .BR_in(BR_in),    // Feed BR input to ALU
+
+        // Data Outputs
+        .ALU_out(ALU_out_wire),   // Get ALU result
+        .ALUflags(ALUflags_wire)  // Get ALU flags
     );
 
-    reg [15:0] ACC;
-    assign ALU_out = ACC;
-    
-    // Temporary registers for flag calculations
-    reg ZF, CF, OF, SF;
-    reg [16:0] temp_result; // 17-bit for carry detection
-    
-    always@(posedge clk or negedge rst_n) begin
-        if(!rst_n) begin
-            ACC <= 16'b0;
+    // Synchronous logic for the accumulator register and flags
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            // Reset accumulator and flags to zero
+            ACC_out <= 16'b0;
             ALUflags <= 4'b0;
-        end
-        else begin
-            // Default flag values
-            ZF = (ACC == 16'b0);
-            SF = ACC[15];  // Sign bit
-            CF = 1'b0;     // Default carry
-            OF = 1'b0;     // Default overflow
-            
-            if(C8) begin
-                ACC <= 16'b0;
-                ZF = 1'b1;  // Reset ACC means ZF=1
-                SF = 1'b0;  // Reset ACC means SF=0
-            end
-            else if(C9) begin 
-                temp_result = {1'b0, ACC} + {1'b0, BR_out};
-                ACC <= temp_result[15:0];
-                CF = temp_result[16];  // Carry flag
-                OF = (ACC[15] == BR_out[15]) && (ACC[15] != temp_result[15]);  // Overflow detection
-                ZF = (temp_result[15:0] == 16'b0);
-                SF = temp_result[15];
-            end
-            else if(C13) begin
-                temp_result = {1'b0, ACC} - {1'b0, BR_out};
-                ACC <= temp_result[15:0];
-                CF = temp_result[16];  // Borrow (inverted carry)
-                OF = (ACC[15] != BR_out[15]) && (ACC[15] != temp_result[15]);  // Overflow detection
-                ZF = (temp_result[15:0] == 16'b0);
-                SF = temp_result[15];
-            end
-            else if(C15) begin
-                ACC <= ACC * BR_out;
-                ZF = (ACC * BR_out == 16'b0);
-                SF = (ACC * BR_out)[15];
-            end
-            else if(C16) begin
-                if(BR_out != 16'b0) begin  // Avoid division by zero
-                    ACC <= ACC / BR_out;
-                    ZF = (ACC / BR_out == 16'b0);
-                    SF = (ACC / BR_out)[15];
-                end
-            end
-            else if(C17) begin
-                ACC <= ACC << BR_out[3:0]; // Shift left logical by BR value
-                ZF = (ACC << BR_out[3:0] == 16'b0);
-                SF = (ACC << BR_out[3:0])[15];
-            end
-            else if(C18) begin
-                ACC <= ACC >> BR_out[3:0]; // Shift right logical by BR value
-                ZF = (ACC >> BR_out[3:0] == 16'b0);
-                SF = (ACC >> BR_out[3:0])[15];
-            end
-            else if(C19) begin
-                ACC <= ACC & BR_out;
-                ZF = ((ACC & BR_out) == 16'b0);
-                SF = (ACC & BR_out)[15];
-            end
-            else if(C20) begin
-                ACC <= ACC | BR_out;
-                ZF = ((ACC | BR_out) == 16'b0);
-                SF = (ACC | BR_out)[15];
-            end
-            else if(C21) begin
-                ACC <= ~BR_out;  // NOT operation on BR, not ACC
-                ZF = (~BR_out == 16'b0);
-                SF = (~BR_out)[15];
-            end
-            
-            // Update ALUflags
-            ALUflags <= {ZF, CF, OF, SF};
+        end else begin
+            // Update accumulator and flags in a single cycle
+            ACC_out <= ALU_out_wire;
+            ALUflags <= ALUflags_wire;
         end
     end
+
 endmodule

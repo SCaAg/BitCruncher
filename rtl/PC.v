@@ -21,30 +21,32 @@
 
 
 module PC(
-    input clk,
-    input rst_n,
-    input C6,
-    input C14,
-    input [15:0] MBR_out,
-    output [7:0] PC_out
+    input wire clk,
+    input wire rst_n,
+    input wire C6,          // PC <- PC+1 (Increment PC)
+    input wire C14,         // PC <- MBR[7:0] (Jump)
+    input wire [15:0] MBR_in,
+    output reg [7:0] PC_out
     );
 
-    reg [7:0] PCr;
-    assign PC_out = PCr;
+
 
     always@(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
-            PCr <= 8'b0;
+            PC_out <= 8'b0;
         end
         else begin
             if(C14) begin
-                PCr <= MBR_out[7:0]; // Use address part, not opcode
+                // Jump instruction - load address from MBR lower 8 bits
+                PC_out <= MBR_in[7:0]; 
             end
             else if(C6) begin
-                PCr <= PCr + 1'b1; //自增
+                // Increment PC
+                PC_out <= PC_out + 1'b1;
             end
+            // If neither C14 nor C6 is active, PC remains unchanged
             else begin
-                PCr <= PCr;
+                PC_out <= PC_out;
             end
         end
     end

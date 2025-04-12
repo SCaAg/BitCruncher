@@ -26,6 +26,4 @@
 | C19  | ACC ← ACC and BR | AND                                                                      |
 | C20  | ACC ← ACC or BR  | OR                                                                       |
 | C21  | ACC ← not ACC    | NOT                                                                      |
-
-
-## 微操作
+| C22  | ACC Enable       | Enable ALU   to write back to ACC register                                 |

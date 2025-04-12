@@ -21,37 +21,36 @@
 
 
 module MBR(
-    input clk,
-    input rst_n,
-    input C3,
-    input C11,
-    input C12,
-    input [15:0] ALU_out,
-    input [15:0] MBR_in_memory,
-    output [15:0] MBR_out,
-    output reg [15:0] MBR_out_memory
+    input  wire clk,
+    input  wire rst_n,
+    input  wire C3,          // MBR <- memory (Load from memory)
+    input  wire C11,         // memory <- MBR (Store to memory)
+    input  wire C12,         // MBR <- ACC (Copy ACC to MBR)
+    input  wire [15:0] memory_in,
+    output reg [15:0] memory_out,
+    input  wire [15:0] ACC_in,
+    output wire [15:0] MBR_out
+    
     );
 
-    reg [15:0] MBRr;
-    assign MBR_out = MBRr;
+    reg [15:0] memory_buffer;
+    assign MBR_out = memory_buffer;
 
     always@(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
-            MBRr <= 16'b0;
+            memory_buffer <= 16'b0;
+            memory_out <= 16'b0;
         end
         else begin
-            if(C3) begin
-                MBRr <= MBR_in_memory;
-            end
-            else if(C12) begin
-                MBRr <= ALU_out;
-            end
-            else begin
-                MBRr <= MBRr;
-            end
-            if(C11) begin
-                MBR_out_memory <= MBRr;
-            end
+            case({C12, C11, C3})
+                3'b001: memory_buffer <= memory_in;
+                3'b010: memory_out <= memory_buffer;
+                3'b100: memory_buffer <= ACC_in;
+                default: begin
+                    memory_buffer <= memory_buffer;
+                    memory_out <= memory_out;
+                end
+            endcase
         end
     end
 endmodule

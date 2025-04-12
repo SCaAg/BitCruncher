@@ -20,27 +20,24 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-    module BR(
-    input clk,
-    input rst_n,
-    input C7,
-    input [15:0] MBR_out,
-    output [15:0] BR_out
-    );
-
-    reg [15:0] BRr;
-    assign BR_out = BRr;
+module BR(
+input wire clk,
+input wire rst_n,
+input wire C7,
+input wire [15:0] MBR_in,
+output reg [15:0] BR_out
+);
 
     always@(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
-            BRr <= 16'b0;
+            BR_out <= 16'b0;
         end
         else begin
             if(C7) begin
-                BRr <= MBR_out; //取操作数
+                BR_out <= MBR_in; //取操作数
             end
             else begin
-                BRr <= BRr;
+                BR_out <= BR_out;
             end
         end
     end
