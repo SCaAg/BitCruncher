@@ -57,10 +57,10 @@ module CU(
     // C22-C31: Reserved for future use
     
     // Microcode memory - 64 addresses, each storing 32-bit control signals
-    reg [31:0] microcode_memory [0:63];
+    reg [31:0] microcode_memory [0:71];
     
     // Control Address Register (CAR) - points to current microinstruction
-    reg [5:0] CAR;
+    reg [7:0] CAR;
     
     // Initialize microcode memory
     initial begin
@@ -78,142 +78,161 @@ module CU(
 
         // Step 3: Decode - Branch based on opcode (C1)
         microcode_memory[3] = 32'b00000000000000000000000000000010; // C1
+        microcode_memory[4] = 32'b00000000000000000000000000000000; // No operation
         
         // Instruction-specific microcodes
         // LOAD instruction (opcode 00000010)
-        microcode_memory[4] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
-        microcode_memory[5] = 32'b00000000000000000000000110000001; // C0|C7|C8 - BR <- MBR, ACC <- 0
-        microcode_memory[6] = 32'b00000000000000000000001000000001; // C0|C9 - ACC <- ACC+BR
-        microcode_memory[7] = 32'b00000000000000000000000000000010; // C1 - Jump to end
-        
+        microcode_memory[5] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
+        microcode_memory[6] = 32'b00000000000000000000000110000001; // C0|C7|C8 - BR <- MBR, ACC <- 0
+        microcode_memory[7] = 32'b00000000000000000000001000000001; // C0|C9 - ACC <- ACC+BR
+        microcode_memory[8] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[9] = 32'b00000000000000000000000000000000; // No operation
+
         // STORE instruction (opcode 00000001)
-        microcode_memory[8] = 32'b00000000000000000001000000000001; // C0|C12 - MBR <- ACC
-        microcode_memory[9] = 32'b00000000000000000000100000000001; // C0|C11 - Mem[MAR] <- MBR
-        microcode_memory[10] = 32'b00000000000000000000000000000010; // C1 - Jump to end
-        microcode_memory[11] = 32'b00000000000000000000000000000000; // No operation
+        microcode_memory[10] = 32'b00000000000000000001000000000001; // C0|C12 - MBR <- ACC
+        microcode_memory[11] = 32'b00000000000000000000100000000001; // C0|C11 - Mem[MAR] <- MBR
+        microcode_memory[12] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[13] = 32'b00000000000000000000000000000000; // No operation
         
         // ADD instruction (opcode 00000011)
-        microcode_memory[12] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
-        microcode_memory[13] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
-        microcode_memory[14] = 32'b00000000000000000000001000000001; // C0|C9 - ACC <- ACC+BR
-        microcode_memory[15] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[14] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
+        microcode_memory[15] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
+        microcode_memory[16] = 32'b00000000000000000000001000000001; // C0|C9 - ACC <- ACC+BR
+        microcode_memory[17] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[18] = 32'b00000000000000000000000000000000; // No operation
         
         // SUB instruction (opcode 00000100)
-        microcode_memory[16] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
-        microcode_memory[17] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
-        microcode_memory[18] = 32'b00000000000000000010000000000001; // C0|C13 - ACC <- ACC-BR
-        microcode_memory[19] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[19] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
+        microcode_memory[20] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
+        microcode_memory[21] = 32'b00000000000000000010000000000001; // C0|C13 - ACC <- ACC-BR
+        microcode_memory[22] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[23] = 32'b00000000000000000000000000000000; // No operation
         
         // JMPGEZ instruction (opcode 00000101) - Jump if ACC >= 0
-        microcode_memory[20] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
+        microcode_memory[24] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
         // Branch based on condition
-        microcode_memory[21] = 32'b00000000000000000000000000000010; // C1 - Condition check (will be redirected based on flags)
+        microcode_memory[25] = 32'b00000000000000000000000000000010; // C1 - Condition check (will be redirected based on flags)
         // Path for when condition is true (ACC >= 0)
-        microcode_memory[22] = 32'b00000000000000000100000000000001; // C0|C14 - PC <- MBR (Jump)
-        microcode_memory[23] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[26] = 32'b00000000000000000100000000000001; // C0|C14 - PC <- MBR (Jump)
+        microcode_memory[27] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[28] = 32'b00000000000000000000000000000000; // No operation
         // Path for when condition is false (ACC < 0)
-        microcode_memory[60] = 32'b00000000000000000000000000000001; // C0 - Just increment CAR (No jump)
-        microcode_memory[61] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[29] = 32'b00000000000000000000000000000001; // C0 - Just increment CAR (No jump)
+        microcode_memory[30] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[31] = 32'b00000000000000000000000000000000; // No operation
         
         // JMP instruction (opcode 00000110)
-        microcode_memory[24] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
-        microcode_memory[25] = 32'b00000000000000000100000000000001; // C0|C14 - PC <- MBR
-        microcode_memory[26] = 32'b00000000000000000000000000000001; // C0 - Increment CAR
-        microcode_memory[27] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[32] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
+        microcode_memory[33] = 32'b00000000000000000100000000000001; // C0|C14 - PC <- MBR
+        microcode_memory[34] = 32'b00000000000000000000000000000001; // C0 - Increment CAR
+        microcode_memory[35] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[36] = 32'b00000000000000000000000000000000; // No operation
         
         // HALT instruction (opcode 00000111)
-        microcode_memory[28] = 32'b00000000000000000000000000000000; // No operation (halt)
-        microcode_memory[29] = 32'b00000000000000000000000000000000; // No operation
-        microcode_memory[30] = 32'b00000000000000000000000000000000; // No operation
-        microcode_memory[31] = 32'b00000000000000000000000000000000; // No operation (halt forever)
+        microcode_memory[37] = 32'b00000000000000000000000000000000; // No operation (halt)
+        microcode_memory[38] = 32'b00000000000000000000000000000000; // No operation
+        microcode_memory[39] = 32'b00000000000000000000000000000000; // No operation
+        microcode_memory[40] = 32'b00000000000000000000000000000000; // No operation (halt forever)
         
         // MPY instruction (opcode 00001000)
-        microcode_memory[32] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
-        microcode_memory[33] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
-        microcode_memory[34] = 32'b00000000000000001000000000000001; // C0|C15 - ACC <- ACC*BR
-        microcode_memory[35] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[41] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
+        microcode_memory[42] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
+        microcode_memory[43] = 32'b00000000000000001000000000000001; // C0|C15 - ACC <- ACC*BR
+        microcode_memory[44] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[45] = 32'b00000000000000000000000000000000; // No operation
         
         // AND instruction (opcode 00001010)
-        microcode_memory[40] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
-        microcode_memory[41] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
-        microcode_memory[42] = 32'b00000000000010000000000000000001; // C0|C19 - ACC <- ACC&BR
-        microcode_memory[43] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[46] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
+        microcode_memory[47] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
+        microcode_memory[48] = 32'b00000000000010000000000000000001; // C0|C19 - ACC <- ACC&BR
+        microcode_memory[49] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[50] = 32'b00000000000000000000000000000000; // No operation
         
         // OR instruction (opcode 00001011)
-        microcode_memory[44] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
-        microcode_memory[45] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
-        microcode_memory[46] = 32'b00000000000100000000000000000001; // C0|C20 - ACC <- ACC|BR
-        microcode_memory[47] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[51] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
+        microcode_memory[52] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
+        microcode_memory[53] = 32'b00000000000100000000000000000001; // C0|C20 - ACC <- ACC|BR
+        microcode_memory[54] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[55] = 32'b00000000000000000000000000000000; // No operation
         
         // NOT instruction (opcode 00001100)
-        microcode_memory[48] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
-        microcode_memory[49] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
-        microcode_memory[50] = 32'b00000000001000000000000000000001; // C0|C21 - ACC <- ~BR
-        microcode_memory[51] = 32'b00000000000000000000000000000010; // C1 - Jump to end
-        
-        // SHIFTR instruction (opcode 00001101)
-        microcode_memory[52] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
-        microcode_memory[53] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
-        microcode_memory[54] = 32'b00000000000001000000000000000001; // C0|C18 - ACC <- ACC>>BR
-        microcode_memory[55] = 32'b00000000000000000000000000000010; // C1 - Jump to end
-        
-        // SHIFTL instruction (opcode 00001110)
         microcode_memory[56] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
         microcode_memory[57] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
-        microcode_memory[58] = 32'b00000000000000100000000000000001; // C0|C17 - ACC <- ACC<<BR
+        microcode_memory[58] = 32'b00000000001000000000000000000001; // C0|C21 - ACC <- ~BR
         microcode_memory[59] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[60] = 32'b00000000000000000000000000000000; // No operation
+        
+        // SHIFTR instruction (opcode 00001101)
+        microcode_memory[61] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
+        microcode_memory[62] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
+        microcode_memory[63] = 32'b00000000000001000000000000000001; // C0|C18 - ACC <- ACC>>BR
+        microcode_memory[64] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[65] = 32'b00000000000000000000000000000000; // No operation
+        
+        // SHIFTL instruction (opcode 00001110)
+        microcode_memory[66] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
+        microcode_memory[67] = 32'b00000000000000000000000010000001; // C0|C7 - BR <- MBR
+        microcode_memory[68] = 32'b00000000000000100000000000000001; // C0|C17 - ACC <- ACC<<BR
+        microcode_memory[69] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[70] = 32'b00000000000000000000000000000000; // No operation
         
         // Common ending for all instructions - return to fetch cycle
         // MAR <- PC, CAR <- 0
-        microcode_memory[63] = 32'b00000000000000000000010000000100; // C2|C10 - Reset CAR to 0 and MAR <- PC
+        microcode_memory[71] = 32'b00000000000000000000010000000100; // C2|C10 - Reset CAR to 0 and MAR <- PC
+    end
+    
+    // Handle Control Signals updates
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            Control_Signals <= 32'd0;
+        end else begin
+            // Output current control signals
+            Control_Signals <= microcode_memory[CAR];
+        end
     end
     
     // Handle Control Address Register updates
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             CAR <= 6'd0;  // Reset to start of fetch cycle
-            Control_Signals <= 32'd0;
         end else begin
-            // Output current control signals
-            Control_Signals <= microcode_memory[CAR];
-            
-            // Update CAR based on current microcode directly, not on Control_Signals
-            if (microcode_memory[CAR][0]) begin  // C0: Increment CAR
+            // Update CAR based on current microcode
+            if (Control_Signals[0]) begin  // C0: Increment CAR
                 CAR <= CAR + 1;
-            end else if (microcode_memory[CAR][1]) begin  // C1: Redirection based on opcode or condition
-                if (CAR == 6'd3) begin
+            end else if (Control_Signals[1]) begin  // C1: Redirection based on opcode or condition
+                if (CAR == 7'd3 + 1'b1) begin
                     // Map opcode to microcode entry points
                     case (IR_out)
-                        `OPCODE_LOAD:   CAR <= 6'd4;
-                        `OPCODE_STORE:  CAR <= 6'd8;
-                        `OPCODE_ADD:    CAR <= 6'd12;
-                        `OPCODE_SUB:    CAR <= 6'd16;
-                        `OPCODE_JMPGEZ: CAR <= 6'd20;
-                        `OPCODE_JMP:    CAR <= 6'd24;
-                        `OPCODE_HALT:   CAR <= 6'd28;
-                        `OPCODE_MPY:    CAR <= 6'd32;
-                        `OPCODE_AND:    CAR <= 6'd40;
-                        `OPCODE_OR:     CAR <= 6'd44;
-                        `OPCODE_NOT:    CAR <= 6'd48;
-                        `OPCODE_SHIFTR: CAR <= 6'd52;
-                        `OPCODE_SHIFTL: CAR <= 6'd56;
-                        default:        CAR <= 6'd63;  // Go to end on unknown opcode
+                        `OPCODE_LOAD:   CAR <= 6'd5;
+                        `OPCODE_STORE:  CAR <= 6'd10;
+                        `OPCODE_ADD:    CAR <= 6'd14;
+                        `OPCODE_SUB:    CAR <= 6'd19;
+                        `OPCODE_JMPGEZ: CAR <= 6'd24;
+                        `OPCODE_JMP:    CAR <= 6'd32;
+                        `OPCODE_HALT:   CAR <= 6'd37;
+                        `OPCODE_MPY:    CAR <= 6'd41;
+                        `OPCODE_AND:    CAR <= 6'd46;
+                        `OPCODE_OR:     CAR <= 6'd51;
+                        `OPCODE_NOT:    CAR <= 6'd56;
+                        `OPCODE_SHIFTR: CAR <= 6'd61;
+                        `OPCODE_SHIFTL: CAR <= 6'd66;
+                        default:        CAR <= 6'd71;  // Go to end on unknown opcode
                     endcase
-                end else if (CAR == 6'd21) begin//TODO: Check if this is correct
+                end else if (CAR == 7'd21) begin//TODO: Check if this is correct
                     // For JMPGEZ conditional branch in microcode
                     // Note: In our implementation, ALUflags[3]=ZF, ALUflags[0]=SF
                     if (ALUflags[0] == 1'b0 || ALUflags[3] == 1'b1) begin
                         // If ACC >= 0, branch to the jump path
-                        CAR <= 6'd22;
+                        CAR <= 7'd22;
                     end else begin
                         // If ACC < 0, branch to the no-jump path
-                        CAR <= 6'd60;
+                        CAR <= 7'd60;
                     end
                 end else begin
-                    CAR <= 6'd63;
+                    CAR <= 7'd71;
                 end
-            end else if (microcode_memory[CAR][2]) begin  // C2: Reset CAR
-                CAR <= 6'd0;
+            end else if (Control_Signals[2]) begin  // C2: Reset CAR
+                CAR <= 7'd0;
             end
         end
     end

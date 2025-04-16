@@ -23,18 +23,18 @@
 module CPU_top(
     input clk,              // System clock
     input rst_n,            // Active-low reset
-    input [15:0] MBR_in_memory,   // Data from memory to MBR
-    output [7:0] MAR_out_memory,  // Address from MAR to memory
-    output [15:0] MBR_out_memory  // Data from MBR to memory
+    input [15:0] data_in,   // Data from memory to MBR
+    output [7:0] address,  // Address from MAR to memory
+    output [15:0] data_out  // Data from MBR to memory
     );
 
     // Internal signals
     wire [31:0] Control_Signals;  // Control signals from CU
-    wire [15:0] MBR_out;          // Output from MBR register
-    wire [15:0] BR_out;           // Output from BR register
-    wire [15:0] ACC_out;          // Output from ALU
-    wire [7:0] IR_out;            // Output from IR register
-    wire [7:0] PC_out;            // Output from PC register
+    wire [15:0] MBR;          // Output from MBR register
+    wire [15:0] BR;           // Output from BR register
+    wire [15:0] ACC;          // Output from ALU
+    wire [15:0] IR;            // Output from IR register
+    wire [7:0] PC;            // Output from PC register
     wire [3:0] ALUflags;          // ALU flags {ZF, CF, OF, SF}
     wire C5, C10;
     assign C5 = Control_Signals[5];
@@ -45,9 +45,9 @@ module CPU_top(
         .rst_n            (rst_n),
         .C5               (C5),     // MAR <- MBR[7:0]
         .C10              (C10),    // MAR <- PC
-        .MBR_out          (MBR_out),
-        .PC_out           (PC_out),
-        .MAR_out_memory   (MAR_out_memory)
+        .MBR_in           (MBR),
+        .PC_in           (PC),
+        .MAR_out   (address)
     );
 
     // Memory Buffer Register (MBR)
@@ -61,10 +61,10 @@ module CPU_top(
         .C3               (C3),     // MBR <- memory
         .C11              (C11),    // memory <- MBR
         .C12              (C12),    // MBR <- ACC
-        .ACC_in           (ACC_out),
-        .memory_in        (MBR_in_memory),
-        .MBR_out          (MBR_out),
-        .memory_out       (MBR_out_memory)
+        .ACC_in           (ACC),
+        .memory_in        (data_in),
+        .MBR_out          (MBR),
+        .memory_out       (data_out)
     );
 
     // Arithmetic Logic Unit and Accumulator
@@ -94,8 +94,8 @@ module CPU_top(
         .C19              (C19),    // ACC <- ACC&BR
         .C20              (C20),    // ACC <- ACC|BR
         .C21              (C21),    // ACC <- ~BR
-        .BR_in           (BR_out),
-        .ACC_out          (ACC_out),
+        .BR_in           (BR),
+        .ACC_out          (ACC),
         .ALUflags         (ALUflags)                // {ZF, CF, OF, SF}
     );
 
@@ -108,8 +108,8 @@ module CPU_top(
         .rst_n            (rst_n),
         .C6               (C6),     // PC <- PC+1
         .C14              (C14),    // PC <- MBR[7:0]
-        .MBR_in           (MBR_out),
-        .PC_out           (PC_out)
+        .IR_in            (IR),
+        .PC_out           (PC)
     );
 
     // Instruction Register (IR)
@@ -119,8 +119,8 @@ module CPU_top(
         .clk              (clk),
         .rst_n            (rst_n),
         .C4               (C4),     // IR <- MBR[15:8]
-        .MBR_in           (MBR_out),
-        .IR_out           (IR_out)
+        .MBR_in           (MBR),
+        .IR_out           (IR)
     );
 
     // Buffer Register (BR)
@@ -130,15 +130,15 @@ module CPU_top(
         .clk              (clk),
         .rst_n            (rst_n),
         .C7               (C7),     // BR <- MBR
-        .MBR_in           (MBR_out),
-        .BR_out           (BR_out)
+        .MBR_in           (MBR),
+        .BR_out           (BR)
     );
 
     // Control Unit (CU)
     CU u_CU(
         .clk              (clk),
         .rst_n            (rst_n),
-        .IR_out           (IR_out),
+        .IR_in           (IR),
         .ALUflags         (ALUflags),
         .Control_Signals  (Control_Signals)
     );

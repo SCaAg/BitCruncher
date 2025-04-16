@@ -42,15 +42,20 @@ module MBR(
             memory_out <= 16'b0;
         end
         else begin
-            case({C12, C11, C3})
-                3'b001: memory_buffer <= memory_in;
-                3'b010: memory_out <= memory_buffer;
-                3'b100: memory_buffer <= ACC_in;
-                default: begin
-                    memory_buffer <= memory_buffer;
-                    memory_out <= memory_out;
-                end
-            endcase
+            if(C3) begin
+                memory_buffer <= memory_in;
+            end
+            else if(C11) begin
+                memory_out <= memory_buffer;
+            end
+            else if(C12) begin
+                memory_buffer <= ACC_in;
+            end
+            else begin
+                memory_buffer <= memory_buffer;
+                memory_out <= memory_out;
+            end
+            
         end
     end
 endmodule

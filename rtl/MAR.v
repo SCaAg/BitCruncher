@@ -25,27 +25,27 @@ module MAR(
     input rst_n,
     input C5,
     input C10,
-    input [15:0] MBR_out,
-    input [7:0] PC_out,
-    output [7:0] MAR_out_memory
+    input [15:0] MBR_in,
+    input [7:0] PC_in,
+    output [7:0] MAR_out
     );
 
-    reg [7:0] MARr;
-    assign MAR_out_memory = MARr;
+    reg [7:0] memory_address_register;
+    assign MAR_out = memory_address_register;
 
     always@(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
-            MARr <= 8'b0;
+            memory_address_register <= 8'b0;
         end
         else begin
             if(C5) begin
-                MARr <= MBR_out[7:0];
+                memory_address_register <= MBR_in[7:0];
             end
             else if(C10) begin
-                MARr <= PC_out;
+                memory_address_register <= PC_in;
             end
             else begin
-                MARr <= MARr;
+                memory_address_register <= memory_address_register;
             end
         end
     end

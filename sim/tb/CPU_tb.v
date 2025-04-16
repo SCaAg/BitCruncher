@@ -4,9 +4,9 @@ module CPU_tb;
     // CPU interfaces
     reg clk;
     reg rst_n;
-    reg [15:0] MBR_in_memory;
-    wire [7:0] MAR_out_memory;
-    wire [15:0] MBR_out_memory;
+    reg [15:0] data_in;
+    wire [7:0] address;
+    wire [15:0] data_out;
     
     // Memory simulation
     reg [15:0] memory [0:255];
@@ -18,9 +18,9 @@ module CPU_tb;
     CPU_top uut (
         .clk(clk),
         .rst_n(rst_n),
-        .MBR_in_memory(MBR_in_memory),
-        .MAR_out_memory(MAR_out_memory),
-        .MBR_out_memory(MBR_out_memory)
+        .data_in(data_in),
+        .address(address),
+        .data_out(data_out)
     );
     
     // Clock generation
@@ -32,15 +32,15 @@ module CPU_tb;
     // Memory simulation
     always @(posedge clk) begin
         // Only process valid memory addresses
-        if (MAR_out_memory !== 8'bxxxxxxxx && MAR_out_memory < 8'd255) begin
+        if (address !== 8'bxxxxxxxx && address < 8'd255) begin
             // Memory read always happens
-            MBR_in_memory <= memory[MAR_out_memory];
+            data_in <= memory[address];
             
             // Memory write happens only when C11 is active
             if (uut.Control_Signals[11]) begin
-                memory[MAR_out_memory] <= MBR_out_memory;
+                memory[address] <= data_out;
                 // For debugging
-                $display("Memory write at address %d: %h", MAR_out_memory, MBR_out_memory);
+                $display("Memory write at address %d: %h", address, data_out);
             end
         end
     end
@@ -77,15 +77,17 @@ module CPU_tb;
             // MPY = 8'b00001000, SHIFTL = 8'b00001110, AND = 8'b00001010
             
             // Address 0: Initialize counter for 2,4,6,...,20 (start with 2)
-            memory[0] = {8'h02, 8'd50};   // LOAD 50 - Load 2 into ACC
-            memory[1] = {8'h01, 8'd60};   // STORE 60 - Store current even number
-         
+            memory[0] = {8'b00000010, 8'd50};   // LOAD 50 - Load 2 into ACC
+            memory[1] = {8'b00000001, 8'd60};   // STORE 60 - Store current even number
+            memory[2] = {8'b00000001, 8'd61};   // ADD 51 - Add 2 to ACC
+            memory[3] = {8'b00000100, 8'd52};   // SUB 52 - Subtract 2 from ACC
+            memory[6] = {8'b00000111, 8'd55};   // HALT 55 - Halt
             
             // Address 41: Halt
-            memory[2] = {8'h07, 8'd0};   // HALT
+            memory[41] = {8'h07, 8'd0};   // HALT
             
             // Data section (constants)
-            memory[50] = 16'hAA;    // Initial even number
+            memory[50] = 16'hFF;    // Initial even number
             memory[51] = 16'd0;    // Initial sum (0)
             memory[52] = 16'd1;    // Constant 1
             memory[53] = 16'd2;    // Constant 2

@@ -25,19 +25,22 @@ input wire clk,
 input wire rst_n,
 input wire C7,
 input wire [15:0] MBR_in,
-output reg [15:0] BR_out
+output wire [15:0] BR_out
 );
-
+    reg [15:0] buffer_register;
+    assign BR_out = buffer_register;
+    
+    
     always@(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
-            BR_out <= 16'b0;
+            buffer_register <= 16'b0;
         end
         else begin
             if(C7) begin
-                BR_out <= MBR_in; //取操作数
+                buffer_register <= MBR_in; //取操作数
             end
             else begin
-                BR_out <= BR_out;
+                buffer_register <= buffer_register;
             end
         end
     end
