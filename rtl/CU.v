@@ -24,7 +24,7 @@
 module CU(
     input wire clk,
     input wire rst_n,
-    input wire [7:0] IR_out,  // Changed from IR_in to IR_out for consistency
+    input wire [15:0] IR_in,  // Changed from IR_in to IR_in for consistency
     input wire [3:0] ALUflags,  // {ZF, CF, OF, SF}
     output reg [31:0] Control_Signals
 );
@@ -112,26 +112,26 @@ module CU(
         microcode_memory[24] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
         // Branch based on condition
         microcode_memory[25] = 32'b00000000000000000000000000000010; // C1 - Condition check (will be redirected based on flags)
+        microcode_memory[26] = 32'b00000000000000000000000000000000; // No operation
         // Path for when condition is true (ACC >= 0)
-        microcode_memory[26] = 32'b00000000000000000100000000000001; // C0|C14 - PC <- MBR (Jump)
-        microcode_memory[27] = 32'b00000000000000000000000000000010; // C1 - Jump to end
-        microcode_memory[28] = 32'b00000000000000000000000000000000; // No operation
+        microcode_memory[27] = 32'b00000000000000000100000000000001; // C0|C14 - PC <- MBR (Jump)
+        microcode_memory[28] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[29] = 32'b00000000000000000000000000000000; // No operation
         // Path for when condition is false (ACC < 0)
-        microcode_memory[29] = 32'b00000000000000000000000000000001; // C0 - Just increment CAR (No jump)
-        microcode_memory[30] = 32'b00000000000000000000000000000010; // C1 - Jump to end
-        microcode_memory[31] = 32'b00000000000000000000000000000000; // No operation
+        microcode_memory[30] = 32'b00000000000000000000000000000001; // C0 - Just increment CAR (No jump)
+        microcode_memory[31] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[32] = 32'b00000000000000000000000000000000; // No operation
         
         // JMP instruction (opcode 00000110)
-        microcode_memory[32] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
-        microcode_memory[33] = 32'b00000000000000000100000000000001; // C0|C14 - PC <- MBR
-        microcode_memory[34] = 32'b00000000000000000000000000000001; // C0 - Increment CAR
-        microcode_memory[35] = 32'b00000000000000000000000000000010; // C1 - Jump to end
-        microcode_memory[36] = 32'b00000000000000000000000000000000; // No operation
+        microcode_memory[33] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
+        microcode_memory[34] = 32'b00000000000000000100000000000001; // C0|C14 - PC <- MBR
+        microcode_memory[35] = 32'b00000000000000000000000000000001; // C0 - Increment CAR
+        microcode_memory[36] = 32'b00000000000000000000000000000010; // C1 - Jump to end
+        microcode_memory[37] = 32'b00000000000000000000000000000000; // No operation
         
         // HALT instruction (opcode 00000111)
-        microcode_memory[37] = 32'b00000000000000000000000000000000; // No operation (halt)
-        microcode_memory[38] = 32'b00000000000000000000000000000000; // No operation
-        microcode_memory[39] = 32'b00000000000000000000000000000000; // No operation
+        microcode_memory[38] = 32'b00000000000000000000000000000000; // No operation (halt)
+        microcode_memory[39] = 32'b00000000000000000000000000000000; // No operation (halt)
         microcode_memory[40] = 32'b00000000000000000000000000000000; // No operation (halt forever)
         
         // MPY instruction (opcode 00001000)
@@ -202,31 +202,31 @@ module CU(
             end else if (Control_Signals[1]) begin  // C1: Redirection based on opcode or condition
                 if (CAR == 7'd3 + 1'b1) begin
                     // Map opcode to microcode entry points
-                    case (IR_out)
-                        `OPCODE_LOAD:   CAR <= 6'd5;
-                        `OPCODE_STORE:  CAR <= 6'd10;
-                        `OPCODE_ADD:    CAR <= 6'd14;
-                        `OPCODE_SUB:    CAR <= 6'd19;
-                        `OPCODE_JMPGEZ: CAR <= 6'd24;
-                        `OPCODE_JMP:    CAR <= 6'd32;
-                        `OPCODE_HALT:   CAR <= 6'd37;
-                        `OPCODE_MPY:    CAR <= 6'd41;
-                        `OPCODE_AND:    CAR <= 6'd46;
-                        `OPCODE_OR:     CAR <= 6'd51;
-                        `OPCODE_NOT:    CAR <= 6'd56;
-                        `OPCODE_SHIFTR: CAR <= 6'd61;
-                        `OPCODE_SHIFTL: CAR <= 6'd66;
-                        default:        CAR <= 6'd71;  // Go to end on unknown opcode
+                    case (IR_in[15:8])
+                        `OPCODE_LOAD:   CAR <= 7'd5;
+                        `OPCODE_STORE:  CAR <= 7'd10;
+                        `OPCODE_ADD:    CAR <= 7'd14;
+                        `OPCODE_SUB:    CAR <= 7'd19;
+                        `OPCODE_JMPGEZ: CAR <= 7'd24;
+                        `OPCODE_JMP:    CAR <= 7'd33;
+                        `OPCODE_HALT:   CAR <= 7'd38;
+                        `OPCODE_MPY:    CAR <= 7'd41;
+                        `OPCODE_AND:    CAR <= 7'd46;
+                        `OPCODE_OR:     CAR <= 7'd51;
+                        `OPCODE_NOT:    CAR <= 7'd56;
+                        `OPCODE_SHIFTR: CAR <= 7'd61;
+                        `OPCODE_SHIFTL: CAR <= 7'd66;
+                        default:        CAR <= 7'd71;  // Go to end on unknown opcode
                     endcase
-                end else if (CAR == 7'd21) begin//TODO: Check if this is correct
+                end else if (CAR == 7'd25 + 1'b1) begin//TODO: Check if this is correct
                     // For JMPGEZ conditional branch in microcode
                     // Note: In our implementation, ALUflags[3]=ZF, ALUflags[0]=SF
                     if (ALUflags[0] == 1'b0 || ALUflags[3] == 1'b1) begin
                         // If ACC >= 0, branch to the jump path
-                        CAR <= 7'd22;
+                        CAR <= 7'd27;
                     end else begin
                         // If ACC < 0, branch to the no-jump path
-                        CAR <= 7'd60;
+                        CAR <= 7'd30;
                     end
                 end else begin
                     CAR <= 7'd71;

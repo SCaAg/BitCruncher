@@ -25,7 +25,7 @@ module PC(
     input wire rst_n,
     input wire C6,          // PC <- PC+1 (Increment PC)
     input wire C14,         // PC <- MBR[7:0] (Jump)
-    input wire [15:0] MBR_in,
+    input wire [15:0] IR_in,
     output reg [7:0] PC_out
     );
 
@@ -38,7 +38,7 @@ module PC(
         else begin
             if(C14) begin
                 // Jump instruction - load address from MBR lower 8 bits
-                PC_out <= MBR_in[7:0]; 
+                PC_out <= IR_in[7:0]; 
             end
             else if(C6) begin
                 // Increment PC
