@@ -27,3 +27,4 @@
 | C20  | ACC ← ACC or BR  | OR                                                                       |
 | C21  | ACC ← not ACC    | NOT                                                                      |
 | C22  | ACC Enable       | Enable ALU   to write back to ACC register                                 |
+| C23  | Write Enable     | Enable CPU to write back to memory                                        |

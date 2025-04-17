@@ -38,6 +38,7 @@ module ALU(
     // Data Inputs
     input [15:0] ACC_in, // Input representing the value that would be in the Accumulator
     input [15:0] BR_in, // Input from Bus Register
+    input [15:0] IR_in, // Input from Instruction Register
 
     // Data Outputs
     output reg [15:0] ALU_out,  // Result of the ALU operation
@@ -114,13 +115,13 @@ module ALU(
             CF = (BR_in == 16'b0); // Use CF to indicate division by zero? Or keep 0? Let's use it.
             OF = 1'b0; // Typically undefined
         end
-        else if (C17) begin // SHL: ACC_in << BR_in[3:0] (Logical Shift Left)
-            result_val = ACC_in << BR_in[3:0];
+        else if (C17) begin // SHL: ACC_in << IR_in[3:0] (Logical Shift Left)
+            result_val = ACC_in << IR_in[3:0];
             // Flags for SHL (simplified: only ZF, SF)
             // CF could be the last bit shifted out, OF could indicate change in sign bit if not intended
             ZF = (result_val == 16'b0);
             SF = result_val[15];
-            case (BR_in[3:0])
+            case (IR_in[3:0])
                 4'd0:  CF = 1'b0;           // 不移位，CF 不定义/保持0
                 4'd1:  CF = ACC_in[15];
                 4'd2:  CF = ACC_in[14];
@@ -142,13 +143,13 @@ module ALU(
 
             OF = 1'b0; // Often unused for logical shifts
         end
-        else if (C18) begin // SHR: ACC_in >> BR_in[3:0] (Logical Shift Right)
-            result_val = ACC_in >> BR_in[3:0];
+        else if (C18) begin // SHR: ACC_in >> IR_in[3:0] (Logical Shift Right)
+            result_val = ACC_in >> IR_in[3:0];
             // Flags for SHR (simplified: only ZF, SF)
             // CF could be the last bit shifted out
             ZF = (result_val == 16'b0);
             SF = result_val[15]; // Will always be 0 for logical right shift unless shift amount is 0
-            case (BR_in[3:0])
+            case (IR_in[3:0])
                 4'd0:  CF = 1'b0; // 没移，CF未定义或为0
                 4'd1:  CF = ACC_in[0];
                 4'd2:  CF = ACC_in[1];
@@ -168,7 +169,7 @@ module ALU(
                 default: CF = 1'b0;
             endcase
 
-            OF = (BR_in[3:0] == 1) ? (result_val[15] ^ CF) : 1'b0;
+            OF = (IR_in[3:0] == 1) ? (result_val[15] ^ CF) : 1'b0;
 
         end
         else if (C19) begin // AND: ACC_in & BR_in
@@ -187,8 +188,8 @@ module ALU(
             CF = 1'b0;
             OF = 1'b0;
         end
-        else if (C21) begin // NOT: ~ACC_in (BR_in is ignored)
-            result_val = ~ACC_in;
+        else if (C21) begin // NOT: ~BR_in (ACC_in is ignored)
+            result_val = ~BR_in;
             // Flags for NOT (ZF, SF based on result, CF=0, OF=0)
             ZF = (result_val == 16'b0);
             SF = result_val[15];

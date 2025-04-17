@@ -31,6 +31,7 @@ module ALU_ACC (
 
     // Data Input
     input wire [15:0] BR_in, // Data input from Bus Register (for ALU)
+    input wire [15:0] IR_in, // Data input from Instruction Register (for ALU)
 
     // Data Outputs
     output reg [15:0] ACC_out, // Current Accumulator Value
@@ -58,7 +59,7 @@ module ALU_ACC (
         // Data Inputs
         .ACC_in(ACC_out), // Feed current ACC value to ALU
         .BR_in(BR_in),    // Feed BR input to ALU
-
+        .IR_in(IR_in),    // Feed IR input to ALU
         // Data Outputs
         .ALU_out(ALU_out_wire),   // Get ALU result
         .ALUflags(ALUflags_wire)  // Get ALU flags

@@ -25,8 +25,10 @@ module CPU_top(
     input rst_n,            // Active-low reset
     input [15:0] data_in,   // Data from memory to MBR
     output [7:0] address,  // Address from MAR to memory
+    output wea,            // Write enable
     output [15:0] data_out  // Data from MBR to memory
-    );
+    ); 
+    
 
     // Internal signals
     wire [31:0] Control_Signals;  // Control signals from CU
@@ -39,6 +41,7 @@ module CPU_top(
     wire C5, C10;
     assign C5 = Control_Signals[5];
     assign C10 = Control_Signals[10];
+    assign wea = Control_Signals[23];
     // Memory Address Register (MAR)
     MAR u_MAR(
         .clk              (clk),
@@ -95,6 +98,7 @@ module CPU_top(
         .C20              (C20),    // ACC <- ACC|BR
         .C21              (C21),    // ACC <- ~BR
         .BR_in           (BR),
+        .IR_in           (IR),
         .ACC_out          (ACC),
         .ALUflags         (ALUflags)                // {ZF, CF, OF, SF}
     );

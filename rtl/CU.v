@@ -92,7 +92,7 @@ module CU(
         microcode_memory[10] = 32'b00000000000000000001000000000001; // C0|C12 - MBR <- ACC
         microcode_memory[11] = 32'b00000000000000000000100000000001; // C0|C11 - Mem[MAR] <- MBR
         microcode_memory[12] = 32'b00000000000000000000000000000010; // C1 - Jump to end
-        microcode_memory[13] = 32'b00000000000000000000000000000000; // No operation
+        microcode_memory[13] = 32'b00000000100000000000000000000000; // C23 - Write Enable
         
         // ADD instruction (opcode 00000011)
         microcode_memory[14] = 32'b00000000000000000000000000001001; // C0|C3 - MBR <- Mem[MAR]
