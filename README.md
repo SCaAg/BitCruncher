@@ -1,5 +1,7 @@
 # BitCruncher CPU Project
 
+[![](doc/BitCruncher.png)](https://github.com/SCaAg/BitCruncher/blob/main/doc/bitcruncher.png)
+
 A 16-bit microprocessor implementation with microprogram-controlled instruction execution, featuring a complete toolchain including assembler, RTL design, and simulation environment.
 
 ## Project Overview
