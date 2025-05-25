@@ -71,10 +71,10 @@ BitCruncher/
 │       ├── ALU_tb.v     # ALU testbench
 │       └── *.v          # Component testbenches
 ├── doc/                # Documentation
-│   ├── complete.md      # Complete design specification
+│   ├── bitcruncher.png  # CPU project icon
 │   ├── instructions.csv # Instruction set reference
 │   ├── MC_def.md        # Microcode definitions
-│   └── 寄组II预定义.md  # Register organization
+│   └── README.md        # README in doc folder
 └── README.md           # This file
 ```
 
