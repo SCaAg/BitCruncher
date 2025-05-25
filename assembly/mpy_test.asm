@@ -1,6 +1,7 @@
 // Test program for the MPY instruction
 // MPY: ACC * [X] -> MR (high 8 bits), ACC (low 8 bits)
 
+CODE SEGMENT
 // --- Code Section ---
 start:
     // Test 1: 10 * 20 = 200 (0xC8)
@@ -18,7 +19,9 @@ start:
     // We cannot directly verify MR with current instructions.
 
     HALT
+END SEGMENT
 
+DATA SEGMENT
 // --- Data Section ---
 operand_a:   DATA 10     // Value 10 (0x000A) - MPY uses lower 8 bits (0x0A)
 operand_b:   DATA 20     // Value 20 (0x0014) - MPY uses lower 8 bits (0x14)
@@ -26,3 +29,4 @@ operand_c:   DATA 30     // Value 30 (0x001E) - MPY uses lower 8 bits (0x1E)
 
 result1_acc: DATA 0      // Placeholder for result of 10*20 (ACC). Expect 200 (0x00C8)
 result2_acc: DATA 0      // Placeholder for result of 20*30 (ACC). Expect 88 (0x0058) 
+END SEGMENT 

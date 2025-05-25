@@ -1,5 +1,6 @@
 // Assembly program to calculate sum 1+...+100
 
+CODE SEGMENT
 // --- Code Section ---
 loop_start:
     LOAD    sum_var     // Load current sum into ACC
@@ -21,7 +22,9 @@ exit_loop:
     LOAD    sum_var     // Load the final calculated sum into ACC
     STORE   result_addr // Store the final sum into the result address
     HALT                // Halt the program
+END SEGMENT
 
+DATA SEGMENT
 // --- Data Section ---
 // Variables used by the program
 sum_var:     DATA 0     // Initial sum = 0
@@ -31,3 +34,4 @@ one_const:   DATA 1     // Constant value 1 for increment/decrement
 result_addr: DATA 0     // Placeholder for the result (will be overwritten)
                     // The address of this label itself could be used if needed
                     // Or store to a known fixed address like 54 if required by testbench
+END SEGMENT
