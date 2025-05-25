@@ -1,30 +1,158 @@
-## 指令集
-![[Pasted image 20250321150625.png]]
+# BitCruncher CPU 寄存器组织与控制信号定义
 
-## 控制信号表
-| Bits | Micro-operation  | Meaning                                                                  |
-| ---- | ---------------- | ------------------------------------------------------------------------ |
-| C0   | CAR ← CAR + 1    | Control Address Increment                                                |
-| C1   | CAR ← ***        | Control Address Redirection, depends on the position of microinstruction |
-| C2   | CAR ← 0          | Reset Control Address to zero position                                   |
-| C3   | MBR ← memory     | Memory Content to MBR                                                    |
-| C4   | IR ← MBR[15:8]   | Copy MBR[15:8] to IR for OPCODE                                          |
-| C5   | PC ← MBR[7:0]    | Increment PC for indicating position                                     |
-| C6   | PC ← PC + 1      | (Meaning not fully clear in the image, possibly “Increment PC”)          |
-| C7   | BR ← MBR         | Copy MBR to BR for buffer to ALU                                         |
-| C8   | ACC ← 0          | Reset ACC register to zero                                               |
-| C9   | ACC ← ACC + BR   | Add BR to ACC, it can be used for LOAD                                   |
-| C10  | MAR ← PC         | Copy PC value to MAR for next address                                    |
-| C11  | memory ← MBR     | MBR to Memory Content                                                    |
-| C12  | MBR ← ACC        | Copy PC value to MBR for calculate result                                |
-| C13  | ACC ← ACC - BR   | Sub BR to ACC                                                            |
-| C14  | PC ← MBR[7:0]    | Increment PC for indicating position                                     |
-| C15  | ACC ← ACC × BR   | Mul BR to ACC                                                            |
-| C16  | ACC ← ACC / BR   | Div BR to ACC                                                            |
-| C17  | ACC ← ACC >>>    | Logic shift right                                                        |
-| C18  | ACC ← ACC <<<    | Logic shift left                                                         |
-| C19  | ACC ← ACC and BR | AND                                                                      |
-| C20  | ACC ← ACC or BR  | OR                                                                       |
-| C21  | ACC ← not ACC    | NOT                                                                      |
-| C22  | ACC Enable       | Enable ALU   to write back to ACC register                                 |
-| C23  | Write Enable     | Enable CPU to write back to memory                                        |
+## CPU 寄存器组织
+
+### 主要寄存器规格
+
+| 寄存器 | 位宽 | 功能描述 | 模块文件 |
+|--------|------|----------|----------|
+| ACC (累加器) | 16位 | 算术逻辑运算的主要操作数和结果存储 | ALU_ACC.v |
+| PC (程序计数器) | 8位 | 存储下一条指令的地址 | PC.v |
+| MAR (存储器地址寄存器) | 8位 | 存储访问存储器的地址 | MAR.v |
+| MBR (存储器缓冲寄存器) | 16位 | 存储器数据的缓冲区 | MBR.v |
+| IR (指令寄存器) | 16位 | 存储当前执行的指令 | IR.v |
+| BR (缓冲寄存器) | 16位 | ALU的第二个操作数 | BR.v |
+
+### 寄存器连接关系
+
+```
+Memory ←→ MBR ←→ IR (指令操作码)
+    ↑      ↓
+   MAR ←→ BR → ALU ←→ ACC
+    ↑              ↗
+   PC ←-----------
+```
+
+### 数据通路宽度
+- **数据总线**: 16位
+- **地址总线**: 8位  
+- **指令格式**: 16位 (8位操作码 + 8位地址)
+- **存储器容量**: 256 × 16位
+
+## 控制信号定义表
+
+### 核心控制信号 (C0-C2)
+| 信号 | 微操作 | 含义 |
+|------|--------|------|
+| C0 | CAR ← CAR + 1 | 控制地址寄存器递增 |
+| C1 | CAR ← *** | 控制地址重定向，依赖于微指令位置 |
+| C2 | CAR ← 0 | 重置控制地址到零位置 |
+
+### 存储器与寄存器操作 (C3-C14)
+| 信号 | 微操作 | 含义 |
+|------|--------|------|
+| C3 | MBR ← memory | 存储器内容到MBR |
+| C4 | IR ← MBR[15:8] | 复制MBR[15:8]到IR作为操作码 |
+| C5 | MAR ← MBR[7:0] | 复制MBR[7:0]到MAR作为地址 |
+| C6 | PC ← PC + 1 | PC递增指示位置 |
+| C7 | BR ← MBR | 复制MBR到BR作为ALU缓冲 |
+| C8 | ACC ← 0 | 重置ACC寄存器为零 |
+| C9 | ACC ← ACC + BR | BR加到ACC |
+| C10 | MAR ← PC | 复制PC值到MAR用于下一地址 |
+| C11 | memory ← MBR | MBR到存储器内容 |
+| C12 | MBR ← ACC | 复制ACC值到MBR |
+| C13 | ACC ← ACC - BR | ACC减去BR |
+| C14 | PC ← MBR[7:0] | 跳转指令，加载MBR到PC |
+
+### ALU操作信号 (C15-C21)
+| 信号 | 微操作 | 含义 |
+|------|--------|------|
+| C15 | ACC ← ACC × BR | ACC乘以BR |
+| C16 | ACC ← ACC ÷ BR | ACC除以BR (保留) |
+| C17 | ACC ← ACC << BR | 逻辑左移 |
+| C18 | ACC ← ACC >> BR | 逻辑右移 |
+| C19 | ACC ← ACC & BR | 逻辑与 |
+| C20 | ACC ← ACC \| BR | 逻辑或 |
+| C21 | ACC ← ~BR | 逻辑非 |
+
+### 系统控制信号 (C22-C31)
+| 信号 | 微操作 | 含义 |
+|------|--------|------|
+| C22 | 保留 | 未使用 |
+| C23 | Write Enable | 使能CPU写回存储器 |
+| C24-C31 | 保留 | 为将来使用保留 |
+
+## 指令格式
+
+### 16位指令字格式
+```
+15    8 7     0
++------+------+
+|OPCODE| ADDR |
++------+------+
+```
+
+- **操作码字段 [15:8]**: 8位，支持最多256条指令
+- **地址字段 [7:0]**: 8位，直接寻址，支持256个存储器位置
+
+## 存储器组织
+
+### 存储器映射
+```
+地址范围     | 用途
+0x00-0x7F   | 代码段 (128条指令)
+0x80-0xFF   | 数据段 (128个数据字)
+```
+
+### 存储器接口信号
+- **address[7:0]**: 从MAR输出的地址
+- **data_in[15:0]**: 从存储器到MBR的数据输入
+- **data_out[15:0]**: 从MBR到存储器的数据输出  
+- **wea**: 写使能信号 (来自C23)
+
+## ALU标志位
+
+### 标志位定义 (ALUflags[3:0])
+| 位 | 标志 | 含义 |
+|----|------|------|
+| [3] | ZF | 零标志 (结果为零时置1) |
+| [2] | CF | 进位标志 (有进位时置1) |
+| [1] | OF | 溢出标志 (有溢出时置1) |
+| [0] | SF | 符号标志 (结果为负时置1) |
+
+### 条件跳转使用
+- **JMPGEZ**: 使用SF标志判断ACC是否≥0
+- 当SF=0时，ACC≥0，执行跳转
+- 当SF=1时，ACC<0，不执行跳转
+
+## 微程序控制器
+
+### 控制存储器规格
+- **容量**: 72 × 32位
+- **地址范围**: 0-71
+- **控制字宽度**: 32位
+- **初始化**: 硬编码在CU.v模块中
+
+### CAR (控制地址寄存器)
+- **位宽**: 8位
+- **复位值**: 0 (取指周期开始)
+- **更新方式**: 
+  - C0: 顺序递增
+  - C1: 条件/无条件跳转
+  - C2: 复位到0
+
+## 时序特性
+
+### 指令执行周期
+1. **取指周期**: 4个时钟周期 (地址0-3)
+2. **执行周期**: 3-5个时钟周期 (指令相关)
+3. **返回周期**: 1个时钟周期 (地址71)
+
+### 总执行时间
+- **典型指令**: 8-10个时钟周期
+- **HALT指令**: 无限循环
+- **条件跳转**: 6-8个时钟周期 (条件相关)
+
+## 设计约束
+
+### 硬件限制
+- 最大存储器容量: 256 × 16位
+- 最大程序长度: 128条指令
+- 寻址模式: 仅支持直接寻址
+- 数据类型: 16位无符号/有符号整数
+
+### 性能特性
+- 单周期微指令执行
+- 流水线: 无 (简单顺序执行)
+- 中断支持: 无
+- 缓存: 无

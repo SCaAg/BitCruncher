@@ -1,23 +1,24 @@
-INSTRUCTION,OPCODE,COMMENTS
+INSTRUCTION,OPCODE,BINARY,DESCRIPTION,OPERATION,CATEGORY,CYCLES
 
-# Data I/O
+# Data Transfer Instructions
+STORE X,00000001,0x01,"Store accumulator to memory","ACC → [X]",Data Transfer,6
+LOAD X,00000010,0x02,"Load memory to accumulator","[X] → ACC",Data Transfer,7
 
-STORE X,00000001,"ACC → [X]"
-LOAD X,00000010,"[X] → ACC"
+# Arithmetic Instructions  
+ADD X,00000011,0x03,"Add memory to accumulator","ACC + [X] → ACC",Arithmetic,6
+SUB X,00000100,0x04,"Subtract memory from accumulator","ACC - [X] → ACC",Arithmetic,6
+MPY X,00001000,0x08,"Multiply accumulator by memory","ACC × [X] → ACC",Arithmetic,6
 
-# Data Calculate
+# Logical Instructions
+AND X,00001010,0x0A,"Logical AND with memory","ACC & [X] → ACC",Logical,6
+OR X,00001011,0x0B,"Logical OR with memory","ACC | [X] → ACC",Logical,6
+NOT X,00001100,0x0C,"Logical NOT of memory","~[X] → ACC",Logical,6
 
-ADD X,00000011,"ACC + [X] → ACC"
-SUB X,00000100,"ACC - [X] → ACC"
-MPY X,00001000,"ACC ×[X] → MR, ACC"
-AND X,00001010,"ACC and [X] → ACC"
-OR X,00001011,"ACC or [X] → ACC"
-NOT X,00001100,"NOT [X] → ACC"
-SHIFTR,00001101,"SHIFT [X] to Right 1bit, Logic Shift"
-SHIFTL,00001110,"SHIFT [X] to Left 1bit, Logic Shift"
+# Shift Instructions
+SHIFTR,00001101,0x0D,"Shift memory right 1 bit","[X] >> 1 → ACC",Shift,6
+SHIFTL,00001110,0x0E,"Shift memory left 1 bit","[X] << 1 → ACC",Shift,6
 
-# Stream Control
-
-JMPGEZ X,00000101,"IF ACC ≥ 0 then X → PC else PC+1 → PC"
-JMP X,00000110,"X → PC"
-HALT,00000111,"Halt a program"
+# Control Flow Instructions
+JMPGEZ X,00000101,0x05,"Jump if ACC >= 0","If ACC ≥ 0 then X → PC else PC+1 → PC",Control Flow,6-8
+JMP X,00000110,0x06,"Unconditional jump","X → PC",Control Flow,7
+HALT,00000111,0x07,"Halt program execution","Stop execution",Control Flow,∞
